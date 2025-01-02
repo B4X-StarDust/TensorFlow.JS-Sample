@@ -9,7 +9,7 @@
   </head>
   <body>
     <h1>TensorFlow.js example</h1>
-    <h2>Wait</h2>
+    <h2>7 squared = </h2>
     <div id="micro-out-div">Working...</div>
     <script>
     // Define a model for linear regression. The script tag makes `tf` available
