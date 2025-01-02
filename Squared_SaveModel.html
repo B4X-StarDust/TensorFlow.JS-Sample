@@ -81,7 +81,8 @@
 
       // Save the model to the user's local filesystem
       async function saveModel() {
-        await model.save('downloads://my-model');
+        //await model.save('downloads://my-model');
+        await model.save('localstorage://my-model');
         alert('Model saved successfully!');
       }
     </script>
