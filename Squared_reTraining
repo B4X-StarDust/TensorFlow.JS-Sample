@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>TensorFlow.js Example</title>
+    <!-- Load TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  </head>
+  <body>
+    <h1>TensorFlow.js Example</h1>
+    <h2>Prediction - Further training </h2>
+    <div id="micro-out-div">Working...</div>
+    <script>
+      // Generate dataset excluding the number 7
+      const randomNumbers = generateRandomNumbers(40, 1, 100, 7);
+
+      // Prepare the dataset
+      const xs = tf.tensor2d(randomNumbers, [randomNumbers.length, 1]);
+      const ys = tf.tensor2d(randomNumbers.map(x => x ** 2), [randomNumbers.length, 1]);
+
+      // Create the model
+      const model = createModel();
+
+      // Train the model with the first dataset
+      model.fit(xs, ys, { epochs: 300 }).then(() => {
+        // Use the model for prediction
+        const prediction = model.predict(tf.tensor2d([7], [1, 1])).dataSync()[0];
+        document.getElementById('micro-out-div').innerText = `7^2 ≈ ${prediction.toFixed(2)}`;
+
+        // Generate a second dataset
+        const randomNumbers2 = generateRandomNumbers(30, 1, 60, 7);
+        const xs2 = tf.tensor2d(randomNumbers2, [randomNumbers2.length, 1]);
+        const ys2 = tf.tensor2d(randomNumbers2.map(x => x ** 2), [randomNumbers2.length, 1]);
+
+        // Train the model with the second dataset
+        model.fit(xs2, ys2, { epochs: 300 }).then(() => {
+          // Additional prediction after refining
+          const refinedPrediction = model.predict(tf.tensor2d([7], [1, 1])).dataSync()[0];
+          document.getElementById('micro-out-div').innerText += `\nRefined 7^2 ≈ ${refinedPrediction.toFixed(2)}`;
+        });
+      });
+
+      // Improved model creation
+      function createModel() {
+        const model = tf.sequential();
+
+        // First hidden layer with more neurons and different activation function
+        model.add(tf.layers.dense({ units: 128, activation: 'relu', inputShape: [1] }));
+
+        // Second hidden layer with fewer neurons
+        model.add(tf.layers.dense({ units: 64, activation: 'relu' }));
+
+        // Output layer for regression
+        model.add(tf.layers.dense({ units: 1 }));
+
+        // Compile the model with an optimizer and loss function suitable for regression
+        model.compile({
+          loss: 'meanSquaredError',
+          optimizer: tf.train.adam(0.01), // Learning rate adjusted
+          metrics: ['mse']
+        });
+
+        return model;
+      }
+
+      // Generate random numbers excluding a specific number
+      function generateRandomNumbers(count, min, max, exclude) {
+        const numbers = new Set();
+        while (numbers.size < count) {
+          const num = Math.floor(Math.random() * (max - min + 1)) + min;
+          if (num !== exclude) {
+            numbers.add(num);
+          }
+        }
+        return Array.from(numbers);
+      }
+    </script>
+  </body>
+</html>
