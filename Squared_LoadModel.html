@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <title>Load Model and Predict</title>
+    <!-- Load TensorFlow.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  </head>
+  <body>
+    <h1>Load Model and Predict</h1>
+    <h2>Prediction for 7</h2>
+    <div id="prediction-result">Waiting for prediction...</div>
+    <button id="load-model-button">Load Model</button>
+    <script>
+      let model;
+
+      // Event listener to load the model when the button is clicked
+      document.getElementById('load-model-button').addEventListener('click', loadModel);
+
+      // Function to load the model
+      async function loadModel() {
+        try {
+          // Load the model from localstorage or a URL (in this case from the download directory)
+          model = await tf.loadLayersModel('localstorage://my-model');
+          //model = await tf.loadLayersModel('downloads://my-model');
+
+          // Predict for the number 7 once the model is loaded
+          const prediction = model.predict(tf.tensor2d([7], [1, 1])).dataSync()[0];
+
+          // Show the result in the div
+          document.getElementById('prediction-result').innerText = `Prediction for 7^2 ≈ ${prediction.toFixed(2)}`;
+        } catch (error) {
+          document.getElementById('prediction-result').innerText = 'Error loading the model: ' + error.message;
+        }
+      }
+    </script>
+  </body>
+</html>
