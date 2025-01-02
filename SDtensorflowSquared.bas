@@ -10,6 +10,8 @@ Sub Class_Globals
 	Private Y() As Int
 End Sub
 
+' add in Main.AppStart
+' <code>BANano.Header.AddJavascriptFile("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js") </code>
 'Initializes the object. You can add parameters to this method if needed.
 Public Sub Initialize(mBANano As BANano)
 	BANano=mBANano
