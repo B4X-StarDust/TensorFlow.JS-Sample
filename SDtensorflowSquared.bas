@@ -12,6 +12,11 @@ End Sub
 
 ' add in Main.AppStart
 ' <code>BANano.Header.AddJavascriptFile("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js") </code>
+' use:
+'TS.Initialize(BANano)
+'TS.SetDataX(X())
+'TS.SetDatay(Y())
+'TS.Predict(idlabel) ' no add #
 'Initializes the object. You can add parameters to this method if needed.
 Public Sub Initialize(mBANano As BANano)
 	BANano=mBANano
