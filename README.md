@@ -1,4 +1,4 @@
-LESSON:
+LESSON: <br>
 Squared
 Squared Improve
 Squared Training
