@@ -10,13 +10,6 @@ Sub Class_Globals
 	Private Y() As Int
 End Sub
 
-' add in Main.AppStart
-' <code>BANano.Header.AddJavascriptFile("https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js") </code>
-' use:
-'TS.Initialize(BANano)
-'TS.SetDataX(X())
-'TS.SetDatay(Y())
-'TS.Predict(idlabel) ' no add #
 'Initializes the object. You can add parameters to this method if needed.
 Public Sub Initialize(mBANano As BANano)
 	BANano=mBANano
@@ -31,13 +24,17 @@ Public Sub SetDataY(yData() As Int)
 	Y=yData
 End Sub
 
-Public Sub Predict(IDelement As String)	
-	BANano.RunInlineJavascriptMethod("predict", Array(X,X.Length,Y,Y.Length,IDelement))
+' example
+' TS.SetDataX(Array As Int(1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,22))
+' TS.SetDatay(Array As Int(1, 4, 9, 16, 25, 36, 64, 81, 100, 121, 144, 169, 196, 225, 256, 289, 324, 361, 400, 441, 484))
+' TS.Predict(7,"predict") 
+Public Sub Predict(nBase As Int, IDelement As String)	
+	BANano.RunInlineJavascriptMethod("predict", Array(nBase, X,X.Length,Y,Y.Length,IDelement))
 End Sub
 
 
 #IF Javascript
-function predict(xx, nx , yy , ny, idel) {
+function predict(bs, xx, nx , yy , ny, idel) {
 	document.getElementById(idel).innerText = 'wait ..';
 	const model = tf.sequential();
     model.add(tf.layers.dense({ units: 64, activation: 'relu', inputShape: [1] }));
@@ -59,7 +56,7 @@ function predict(xx, nx , yy , ny, idel) {
       //model.predict(tf.tensor2d([5], [1, 1])).print();
 
       // Open the browser devtools to see the output
-      document.getElementById(idel).innerText =  'Predict: ' + model.predict(tf.tensor2d([7], [1, 1])).dataSync()[0];
+      document.getElementById(idel).innerText =  'Predict: ' + model.predict(tf.tensor2d([bs], [1, 1])).dataSync()[0];
     });
     return value;
 }
