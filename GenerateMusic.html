@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generatore di Jingle con TensorFlow.js</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.40/Tone.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        .log {
+            margin-top: 20px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>Generatore di Jingle con TensorFlow.js</h1>
+    <p>Clicca per generare un jingle unico ogni volta!</p>
+    <button id="play">Genera Jingle</button>
+    <div class="log" id="log"></div>
+
+    <script>
+        async function generateJingle() {
+            // Inizializza strumenti
+            const synth = new Tone.PolySynth(Tone.Synth).toDestination();
+            const reverb = new Tone.Reverb({ decay: 3, wet: 0.5 }).toDestination();
+            synth.connect(reverb);
+
+            // Scala di riferimento (Do maggiore)
+            const scale = ['C4', 'D4', 'E4', 'F4', 'G4', 'A4', 'B4', 'C5'];
+
+            // Genera un accordo basato su una distribuzione casuale
+            function generateChord() {
+                const rootIndex = tf.randomUniform([1], 0, scale.length - 2, 'int32').dataSync()[0];
+                return [scale[rootIndex], scale[rootIndex + 2], scale[rootIndex + 4]];
+            }
+
+            // Genera una melodia usando TensorFlow.js
+            function generateMelody(chord, length = 8) {
+                const melody = [];
+                for (let i = 0; i < length; i++) {
+                    const randomNote = tf.randomUniform([1], 0, scale.length, 'int32').dataSync()[0];
+                    melody.push(scale[randomNote]);
+                }
+                return [...chord, ...melody];
+            }
+
+            // Progressione di accordi e melodia
+            const progression = [generateChord(), generateChord()];
+            const jingle = progression.reduce((acc, chord) => {
+                return acc.concat(generateMelody(chord));
+            }, []);
+
+            // Log della sequenza generata
+            document.getElementById('log').innerText = 'Jingle generato: ' + jingle.join(', ');
+
+            // Riproduzione del jingle
+            let time = Tone.now();
+            jingle.forEach((note, index) => {
+                const duration = index % 4 === 0 ? '4n' : '8n'; // Accordature e note alternate
+                synth.triggerAttackRelease(note, duration, time);
+                time += 0.5;
+            });
+
+            // Ferma la musica al termine
+            setTimeout(() => {
+                document.getElementById('log').innerText += '\nRiproduzione terminata.';
+            }, jingle.length * 500);
+        }
+
+        document.getElementById('play').addEventListener('click', generateJingle);
+    </script>
+</body>
+</html>
