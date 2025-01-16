@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generatore di Musica con Magenta.js</title>
+
+    <!-- Carica @magenta/music -->
+    <script src="https://cdn.jsdelivr.net/npm/@magenta/music@1.0.0"></script>
+
+    <style>
+      /* Stili di base per il corpo della pagina */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+        text-align: center;
+        margin-top: 50px;
+      }
+
+      h1 {
+        color: #4CAF50;
+      }
+
+      p {
+        font-size: 18px;
+        margin: 20px 0;
+      }
+
+      /* Stile per il pulsante */
+      button {
+        padding: 15px 30px;
+        font-size: 18px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      button:focus {
+        outline: none;
+      }
+
+      /* Margine superiore per il contenuto */
+      #content {
+        margin-top: 20px;
+      }
+
+      /* Nascondi il pulsante quando la musica è in esecuzione */
+      #start {
+        display: block;
+      }
+    </style>
+
+    <script>
+      // Instanza il modello MusicVAE
+      const model = new mm.MusicVAE(
+          'https://storage.googleapis.com/download.magenta.tensorflow.org/' +
+          'tfjs_checkpoints/music_vae/trio_4bar_lokl_small_q1');
+      const player = new mm.Player();
+
+      const start = () => {
+        document.getElementById("start").style.display = "none"; // Nasconde il pulsante dopo il clic
+        // Resume AudioContext on user action to enable audio.
+        mm.Player.tone.context.resume();
+        
+        model.initialize().then(
+          // Funzione che genera e riproduce la musica
+          function sampleAndPlay() {
+            return model.sample(1) // Genera una sequenza musicale
+                .then((samples) => player.start(samples[0])) // Riproduce la sequenza generata
+                .then(sampleAndPlay); // Continua a generare e riprodurre in loop
+          });
+      };
+    </script>
+  </head>
+
+  <body>
+    <div id="content">
+      <h1>Generatore di Musica con Magenta.js</h1>
+      <p>Clicca su "Start" per generare un breve jingle musicale.</p>
+      <button id="start" onclick="start()">Start</button>
+    </div>
+  </body>
+</html>

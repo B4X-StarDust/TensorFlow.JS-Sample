@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generatore di Musica con Magenta.js</title>
+
+    <!-- Carica @magenta/music -->
+    <script src="https://cdn.jsdelivr.net/npm/@magenta/music@1.0.0"></script>
+
+    <style>
+      /* Stili di base per il corpo della pagina */
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        color: #333;
+        text-align: center;
+        margin-top: 50px;
+      }
+
+      h1 {
+        color: #4CAF50;
+      }
+
+      p {
+        font-size: 18px;
+        margin: 20px 0;
+      }
+
+      /* Stile per il pulsante */
+      button {
+        padding: 15px 30px;
+        font-size: 18px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s;
+        margin: 10px;
+      }
+
+      button:hover {
+        background-color: #45a049;
+      }
+
+      button:focus {
+        outline: none;
+      }
+
+      /* Stile per il menu a discesa */
+      select {
+        font-size: 18px;
+        padding: 10px;
+        margin: 10px;
+      }
+
+      /* Margine superiore per il contenuto */
+      #content {
+        margin-top: 20px;
+      }
+
+      /* Messaggio di errore */
+      #error-message {
+        color: red;
+        font-size: 18px;
+        margin-top: 20px;
+        display: none;
+      }
+
+      /* Nascondi il pulsante quando la musica è in esecuzione */
+      #start {
+        display: block;
+      }
+
+      /* Nascondi il messaggio di errore */
+      #stop {
+        display: none;
+      }
+    </style>
+
+    <script>
+      let model;
+      const player = new mm.Player();
+      let isPlaying = false; // Variabile per tenere traccia se la musica è in esecuzione
+
+      // Funzione per cambiare il modello selezionato
+      function updateModel() {
+        const modelName = document.getElementById("modelSelect").value;
+        model = new mm.MusicVAE(
+          'https://storage.googleapis.com/download.magenta.tensorflow.org/tfjs_checkpoints/music_vae/' + modelName);
+
+        // Reset error message
+        document.getElementById("error-message").style.display = "none";
+      }
+
+      // Funzione per iniziare la generazione della musica
+      const start = () => {
+        if (!model) {
+          alert('Seleziona un modello prima di avviare!');
+          return;
+        }
+
+        document.getElementById("start").style.display = "none"; // Nasconde il pulsante "Start"
+        document.getElementById("stop").style.display = "inline-block"; // Mostra il pulsante "Stop"
+        
+        // Resume AudioContext on user action to enable audio.
+        mm.Player.tone.context.resume();
+
+        model.initialize().then(
+          function sampleAndPlay() {
+            return model.sample(1) // Genera una sequenza musicale
+                .then((samples) => player.start(samples[0])) // Riproduce la sequenza generata
+                .then(sampleAndPlay); // Continua a generare e riprodurre in loop
+          })
+          .catch((error) => {
+            // Gestisci gli errori (es. modello non trovato)
+            document.getElementById("error-message").innerText = `Errore nel caricare il modello: ${error.message}`;
+            document.getElementById("error-message").style.display = "block";
+            console.error(error);
+            document.getElementById("start").style.display = "inline-block"; // Mostra il pulsante "Start"
+            document.getElementById("stop").style.display = "none"; // Nascondi il pulsante "Stop"
+          });
+
+        isPlaying = true; // Segna che la musica è in esecuzione
+      };
+
+      // Funzione per fermare la musica
+      const stop = () => {
+        if (isPlaying) {
+          player.stop(); // Ferma la musica
+          document.getElementById("start").style.display = "inline-block"; // Mostra il pulsante "Start"
+          document.getElementById("stop").style.display = "none"; // Nascondi il pulsante "Stop"
+          isPlaying = false; // Segna che la musica è fermata
+        }
+      };
+
+      // Imposta il modello di default al caricamento della pagina
+      window.onload = function() {
+        updateModel();
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="content">
+      <h1>Generatore di Musica con Magenta.js</h1>
+      <p>Scegli un modello musicale:</p>
+      
+      <!-- Dropdown per scegliere il modello -->
+      <select id="modelSelect" onchange="updateModel()">
+        <option value="trio_4bar_lokl_small_q1">trio_4bar_lokl_small_q1</option>
+        <option value="drums_2bar_lokl_small">drums_2bar_lokl_small</option>
+        <option value="drums_2bar_hikl_small">drums_2bar_hikl_small</option>
+        <option value="drums_2bar_nade_9_q2">drums_2bar_nade_9_q2</option>
+        <option value="drums_4bar_med_q2">drums_4bar_med_q2</option>
+        <option value="mel_2bar_small">mel_2bar_small</option>
+        <option value="mel_4bar_med_q2">mel_4bar_med_q2</option>
+        <option value="mel_4bar_med_lokl_q2">mel_4bar_med_lokl_q2</option>
+        <option value="mel_4bar_small_q2">mel_4bar_small_q2</option>
+        <option value="mel_chords">mel_chords</option>
+        <option value="mel_16bar_small_q2">mel_16bar_small_q2</option>
+        <option value="trio_4bar_lokl_small_q1">trio_4bar_lokl_small_q1</option>
+        <option value="multitrack">multitrack</option>
+        <option value="multitrack_med">multitrack_med</option>
+        <option value="multitrack_med_fb256">multitrack_med_fb256</option>
+        <option value="multitrack_chords">multitrack_chords</option>
+        <option value="groovae_2bar_humanize">groovae_2bar_humanize</option>
+        <option value="tap2drum_1bar">tap2drum_1bar</option>
+        <option value="tap2drum_2bar">tap2drum_2bar</option>
+        <option value="tap2drum_3bar">tap2drum_3bar</option>
+        <option value="tap2drum_4bar">tap2drum_4bar</option>
+        <option value="groovae_4bar">groovae_4bar</option>
+        <option value="basic_rnn">basic_rnn</option>
+        <option value="melody_rnn">melody_rnn</option>
+        <option value="drum_kit_rnn">drum_kit_rnn</option>
+        <option value="chord_pitches_improv">chord_pitches_improv</option>
+        <option value="onsets_frames_uni">onsets_frames_uni</option>
+        <option value="onsets_frames_uni_q2">onsets_frames_uni_q2</option>
+        <option value="ddsp_flute">ddsp_flute</option>
+        <option value="ddsp_tenor_saxophone">ddsp_tenor_saxophone</option>
+        <option value="ddsp_trumpet">ddsp_trumpet</option>
+        <option value="ddsp_violin">ddsp_violin</option>
+      </select>
+
+      <p>Clicca su "Start" per generare un breve jingle musicale.</p>
+      
+      <!-- Bottone per Start -->
+      <button id="start" onclick="start()">Start</button>
+      
+      <!-- Bottone per Stop -->
+      <button id="stop" onclick="stop()" style="display:none;">Stop</button>
+
+      <!-- Messaggio di errore -->
+      <div id="error-message"></div>
+    </div>
+  </body>
+</html>
